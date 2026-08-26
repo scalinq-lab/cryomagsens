@@ -1,0 +1,32 @@
+.history/
+
+# KiCad Temporary files and locks
+~*
+*.*.lck
+*.tmp
+
+# KiCad Backups
+*-bak
+*.bak
+*.bck
+*-save.kicad_pcb
+*-save.kicad_sch
+*-save.pro
+*-save.kicad_pro
+
+# KiCad User-specific local settings
+*.kicad_prl
+
+# Netlist files (intermediate generated files)
+*.net
+
+# Autorouter files
+*.dsn
+*.ses
+
+# Manufacturing outputs 
+*.gbr
+*.drl
+*.pos
+*.csv
+*.rpt

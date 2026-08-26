@@ -1,0 +1,5 @@
+(design_block_lib_table
+	(version 7)
+	(lib (name "SamacSys_Parts.3dshapes") (type "KiCad") (uri "C:/Users/Julius/Documents/KiCad/10.0/SamacSys_Parts.3dshapes") (options "") (descr ""))
+	(lib (name "SPU_3D.3dshapes") (type "KiCad") (uri "${KIPRJMOD}/SPU_3D.3dshapes") (options "") (descr ""))
+)

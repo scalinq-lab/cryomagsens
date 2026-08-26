@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "SPU_custom_symbols") (type "KiCad") (uri "${KIPRJMOD}/SPU_custom_symbols.kicad_sym") (options "") (descr ""))
+)
