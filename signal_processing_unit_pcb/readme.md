@@ -1,6 +1,6 @@
 # Signal Processing Unit: Schematics and PCB Design
 
-![Signal processing unit](SPU_picture_0.jpg)
+![Signal processing unit](SPU_picture_1.jpg)
 *(Assembled signal processing unit)*
 
 ## Design
