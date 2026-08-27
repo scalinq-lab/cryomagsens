@@ -86,13 +86,11 @@ int main()
     /* POLLING LOOP */
     while (true) {
 
-
         // --- READ USER COMMANDS ---
         if (read_usb_input()) {
             // Process the command if one was received
             process_command();
         }
-
 
         // --- STOP MEASUREMENT ---
         // Clean shutdown ensured all timers are turned off
@@ -120,7 +118,6 @@ int main()
             // 6. Report that a clean shutdown has now occured
             printf("Clean shutdown completed!\n\n");
         }
-
 
         // --- START MEASUREMENT ---
         // If we are currently inactive and we have sensors connected we want to start measurement if we ensure:
@@ -164,7 +161,6 @@ int main()
             printf("Measurements started!\n\n");
         }
         
-        
         // --- DATA PROCESSING & SENSOR SWITCH ---
         if (integration_timer_flag) {
             integration_timer_flag = false;
@@ -175,7 +171,6 @@ int main()
                 ads8866_start_conversion();
                 sum += ads8866_get_voltage();
             }
-            
 
             // 2. Switch buffers
             // - This is timed to the beginning of a spinning current cycle
@@ -204,7 +199,6 @@ int main()
             flush_buffers();
         }
 
-
         // --- UPDATE SENSORS ---
         if (sensor_presence_changed_flag) {
             sensor_presence_changed_flag = false;
@@ -223,7 +217,6 @@ int main()
                 do_clean_shutdown = true;
             }
         }
-
 
         // --- IDLE MESSAGE ---
         if (!measurement_active && time_us_64() - time_last_idle_print > 5000000) {
