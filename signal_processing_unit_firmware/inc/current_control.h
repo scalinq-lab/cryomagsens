@@ -9,7 +9,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// Enum naming the different spinning current states after general direction of the current
+// =====================================================================================================================
+// Current parameter enumerators
+// =====================================================================================================================
+
+// Different spinning current direction states after general direction of the current through the hall element
 typedef enum {
     
     // Current traveling from node d -> b
@@ -26,7 +30,7 @@ typedef enum {
 
 } SpinningCurrentState;
 
-// Enum naming the different current states, this is tied to multiplexer states and hardware resistances
+// Different current level states, this is tied to multiplexer states and hardware resistances
 typedef enum {
     CURRENT_AUTO = -1,
     CURRENT_3000_uA = 0,
@@ -34,6 +38,10 @@ typedef enum {
     CURRENT_30_uA = 2, 
     CURRENT_8300_uA = 3 
 } CurrentLevel;
+
+// =====================================================================================================================
+// Global variables
+// =====================================================================================================================
 
 // Flag indicating that it's time to switch buffers and calculate results
 extern volatile bool integration_timer_flag;
@@ -76,6 +84,10 @@ extern volatile uint32_t axis_unstable_time_us;
 
 // The configured current level
 extern volatile CurrentLevel user_defined_current_level;
+
+// =====================================================================================================================
+// Functions
+// =====================================================================================================================
 
 // Starts the current modulation/axis switching timer
 // - This also triggers the axis switching at the required intervals

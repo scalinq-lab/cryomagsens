@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "AD7175_adc.h"
+#include "buffers.h"
 #include "current_control.h"
 #include "sensor.h"
 
@@ -17,11 +18,60 @@
 #include "pico/stdlib.h"
 #include "pico/multicore.h"
 
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
 
+// Character buffer
 static char usb_buffer[INPUT_BUFFER_SIZE];
 static uint8_t usb_buffer_index = 0;
 
+// Counter for retrieval of raw data points
 static volatile uint32_t number_of_raw_data_points = 0;
+
+// Alternate retrieval function for retrieval of raw data points
+static void get_raw_data() {
+    // Buffer
+    uint32_t raw_data_buffer[number_of_raw_data_points];
+
+    // Get raw data from the ADC
+    for (uint32_t i = 0; i < number_of_raw_data_points; i++) {
+        while (gpio_get(ADC0_MISO)); // Wait for DRDY (MISO goes low)
+        raw_data_buffer[i] = ad7175_fast_read() | (spinning_current_state << 24) | ((axis_state_stable && modulation_state_stable) << 26); // Store the raw ADC value along with the current state and modulation stability
+    }
+
+    // Print the raw data
+    for (uint32_t i = 0; i < number_of_raw_data_points; i++) {
+        // Calculate voltage
+
+        uint32_t adc_value = raw_data_buffer[i] & 0xFFFFFF; // Mask to get the 24-bit ADC value
+        uint8_t spinning_current_state = (raw_data_buffer[i] >> 24) & 0x03; // Extract the current state (2 bits)
+        uint8_t modulation_state_stable = (raw_data_buffer[i] >> 26) & 0x01; // Extract the modulation stability state (1 bit)
+
+        double voltage = (((double)adc_value - (double)zeroed_offset_binary) / (double)0x800000) * ADC_VOLTAGE_REFERENCE; // Assuming bipolar mode and 24-bit ADC
+        printf("Raw voltage: %f V %u %u\n", voltage, spinning_current_state, modulation_state_stable);
+    }
+    printf("done!\n\n");
+    number_of_raw_data_points = 0; // Reset the number of raw data points after printing
+
+    return;
+}
+
+// Reboot measurements following settings change
+// - Mainly needed to flush buffers, but also to update timer intervals
+// - Reboot not needed in debug mode, which is handled here
+static void reboot_measurement() {
+    if (debug_mode) {
+        printf("Debug mode: No reboot required.\n");
+    }
+    else {
+        reboot_measurement_flag = true;
+    }
+}
+
+// =====================================================================================================================
+// API (Public)
+// =====================================================================================================================
 
 volatile bool debug_mode = false;
 volatile bool reboot_measurement_flag = false;
@@ -56,44 +106,6 @@ bool read_usb_input() {
     }
 }
 
-static void get_raw_data() {
-    // Buffer
-    uint32_t raw_data_buffer[number_of_raw_data_points];
-
-    // Get raw data from the ADC
-    for (uint32_t i = 0; i < number_of_raw_data_points; i++) {
-        while (gpio_get(ADC0_MISO)); // Wait for DRDY (MISO goes low)
-        raw_data_buffer[i] = ad7175_fast_read() | (spinning_current_state << 24) | ((axis_state_stable && modulation_state_stable) << 26); // Store the raw ADC value along with the current state and modulation stability
-    }
-
-    // Print the raw data
-    for (uint32_t i = 0; i < number_of_raw_data_points; i++) {
-        // Calculate voltage
-
-        uint32_t adc_value = raw_data_buffer[i] & 0xFFFFFF; // Mask to get the 24-bit ADC value
-        uint8_t spinning_current_state = (raw_data_buffer[i] >> 24) & 0x03; // Extract the current state (2 bits)
-        uint8_t modulation_state_stable = (raw_data_buffer[i] >> 26) & 0x01; // Extract the modulation stability state (1 bit)
-
-        double voltage = (((double)adc_value - (double)zeroed_offset_binary) / (double)0x800000) * ADC_VOLTAGE_REFERENCE; // Assuming bipolar mode and 24-bit ADC
-        printf("Raw voltage: %f V %u %u\n", voltage, spinning_current_state, modulation_state_stable);
-    }
-    printf("done!\n\n");
-    number_of_raw_data_points = 0; // Reset the number of raw data points after printing
-
-    return;
-}
-
-static void reboot_measurement() {
-    if (debug_mode) {
-        printf("Debug mode: No reboot required.\n");
-    }
-    else {
-        reboot_measurement_flag = true;
-    }
-}
-
-// TODO: Only print awaiting reboot if we are currently measuring (not manually off)
-
 void process_command() {
     int32_t parameter_0;
     int32_t parameter_1;
@@ -104,11 +116,11 @@ void process_command() {
         printf("  help\n");
         printf("    - Show this help message\n\n");
         
-        printf("  status\n"); // TODO: simplify commands like this one
+        printf("  status\n");
         printf("    - Print current system status\n\n");
 
         printf("  set current level <>\n");
-        printf("    - 0 - 3 mA, 1 - 300 uA, 2 - 30 uA, 3 - 8.3 mA, 4 - Auto (Not yet implemented)\n\n"); // TODO:
+        printf("    - 0 - 3 mA, 1 - 300 uA, 2 - 30 uA, 3 - 8.3 mA, 4 - Auto (Not yet implemented)\n\n"); // TODO: auto
 
         printf("  set integration time <ms>\n");
         printf("    - Set the integration time in milliseconds\n\n");
@@ -148,8 +160,6 @@ void process_command() {
             printf("    - Get specified number of raw data points from the ADC\n\n");
         }
     }
-
-
 
     else if (strcmp(usb_buffer, "status") == 0) {
         if (debug_mode) {
@@ -259,13 +269,11 @@ void process_command() {
         printf("Modulation unstable time set to: %u us, awaiting change to take effect...\n\n", parameter_0);
     }
 
-
     else if (strcmp(usb_buffer, "reset") == 0) {
         reboot_measurement();
         printf("System resetting, awaiting change to take effect...\n\n");
     }
 
-    
     else if (sscanf(usb_buffer, "debug %u", &parameter_0) == 1) {
         debug_mode = parameter_0;
 
@@ -323,8 +331,6 @@ void process_command() {
             break;
         }
     }
-
-
     
     else if (debug_mode && sscanf(usb_buffer, "toggle current %u", &parameter_0) == 1) {
 
@@ -387,4 +393,3 @@ void process_command() {
 
     return;
 }
-

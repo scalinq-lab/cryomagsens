@@ -12,10 +12,11 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 
-// Default value assumes that the ADC has managed to zero in perfectly
-int32_t volatile zeroed_offset_binary = 0x800000;
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
 
-void ad7175_write_reg16(uint8_t reg, uint16_t value) {
+static void ad7175_write_reg16(uint8_t reg, uint16_t value) {
     uint8_t buf[3];
     buf[0] = 0x00 | (reg & 0x3F); // 0x00 (WEN=0, R/W=0) + Register Address
     buf[1] = (value >> 8) & 0xFF; // MSB
@@ -23,6 +24,12 @@ void ad7175_write_reg16(uint8_t reg, uint16_t value) {
 
     spi_write_blocking(SPI_ADC0, buf, 3);
 }
+
+// =====================================================================================================================
+// API (Public)
+// =====================================================================================================================
+
+int32_t volatile zeroed_offset_binary = 0x800000;
 
 void init_ad7175() {
 
@@ -33,7 +40,7 @@ void init_ad7175() {
     gpio_set_function(ADC0_SCLK,  GPIO_FUNC_SPI);
     gpio_set_function(ADC0_MOSI, GPIO_FUNC_SPI);
 
-    // Sync/err pin is default high
+    // SYNC/ERR pin is default high for the ADC to be active
     gpio_init(ADC0_SYNC_ERR);
     gpio_set_dir(ADC0_SYNC_ERR, GPIO_OUT);
     gpio_put(ADC0_SYNC_ERR, 1);
@@ -41,7 +48,7 @@ void init_ad7175() {
 
 void configure_ad7175(void){
 
-    // Reset the ADC
+    // Force reset the ADC
     uint8_t reset_cmd[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     spi_write_blocking(SPI_ADC0, reset_cmd, 8);
     sleep_ms(10);  
@@ -52,7 +59,7 @@ void configure_ad7175(void){
     // Bits 9:5 = 00000: AINPOS0 (AIN0)
     // Bits 4:0 = 00001: AINNEG0 (AIN1) -> Connect AIN1 to Ground
     // Hex Calculation: 0x8000 | 0x0001 = 0x8001
-    ad7175_write_reg16(REG_CH0, 0x8001); 
+    ad7175_write_reg16(AD7175_REG_CH0, 0x8001); 
 
     // 2. Configure Setup 0 (REG_SETUPCON0: 0x20)
     // Bit 12 = 1: BI_UNIPOLAR (Bipolar coding)
@@ -62,7 +69,7 @@ void configure_ad7175(void){
     // Bit 6 = reserved
     // Bits 5:4 = 10: REF_SEL, Internal 2.5V reference
     // Hex Calculation: 0x1000 | 0x0C00 | 0x0300 | 0x0020 = 0x1F20
-    ad7175_write_reg16(REG_SETUPCON0, 0x1F20);
+    ad7175_write_reg16(AD7175_REG_SETUPCON0, 0x1F20);
     
     // 3. Setup Filter (REG_FILTCON0: 0x28)
     // Bit 15: SINC3_MAP0 = 0 (some filter mapping I don't really understand. We don't want it)
@@ -70,14 +77,14 @@ void configure_ad7175(void){
     // Bits 10:8 = 000: These bits configure digital filters. We don't use those filters, so these bits are irrelevant
     // Bits 6:5 = 00: Sets the digital filter to Sinc5 + Sinc1. We don't use the digital filters
     // Bits 4:0 = 00000: Sets output data rate to 250 kSps
-    ad7175_write_reg16(REG_FILTCON0, 0x0000); 
+    ad7175_write_reg16(AD7175_REG_FILTCON0, 0x0000); 
 
     // 4. ADC Mode (REG_ADCMODE: 0x01)
     // Bit 15: 1: Enables internal reference
     // Bits 10:8 = 000: Sets the measurement delay to 0 µs
     // Bits 6:4 = 000: Sets conversion mode to continous 
     // Bits 3:2 = 00: Sets internal oscillator
-    ad7175_write_reg16(REG_ADCMODE, 0x8000); 
+    ad7175_write_reg16(AD7175_REG_ADCMODE, 0x8000); 
 
     // 5. Interface Mode (REG_IFMODE: 0x02)
     // Bit 12 = 0: Disables the use of the Sync/Error pin as a chip-select pin
@@ -85,7 +92,7 @@ void configure_ad7175(void){
     // Bit 8 = 0: DOUT reset bit
     // Bit 7: CONT_READ = 1 (Continuous Read mode - eliminates command overhead)
     // Disable all other functions
-    ad7175_write_reg16(REG_IFMODE, 0x0080);
+    ad7175_write_reg16(AD7175_REG_IFMODE, 0x0080);
 }
 
 uint32_t ad7175_fast_read() {

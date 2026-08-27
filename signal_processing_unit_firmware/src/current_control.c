@@ -10,19 +10,10 @@
 
 #include "pico/stdlib.h"
 
-// ----------------- Global variables -----------------  
-volatile bool modulation_state_stable = true;
-volatile bool axis_state_stable = true;
-volatile SpinningCurrentState spinning_current_state = CURRENT_SOUTH;
-volatile uint32_t integration_time_ms = DEFAULT_INTEGRATION_TIME_MS; 
-volatile uint32_t current_polarity_frequency = DEFAULT_CURRENT_POLARITY_FREQUENCY;
-volatile uint32_t current_axis_frequency = DEFAULT_CURRENT_AXIS_FREQUENCY; 
-volatile uint32_t modulation_propagation_time_us = DEFAULT_MODULATION_PROPAGATION_TIME_US;
-volatile uint32_t modulation_unstable_time_us = DEFAULT_MODULATION_UNSTABLE_TIME_US;
-volatile uint32_t axis_unstable_time_us = DEFAULT_AXIS_UNSTABLE_TIME_US; 
-volatile CurrentLevel user_defined_current_level = CURRENT_3000_uA;
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
 
-// ----------------- Static variables ----------------- 
 static repeating_timer_t current_timer;
 
 // Counts the current modulation switches
@@ -31,18 +22,17 @@ static int switch_counter = 0;
 // The threshhold of current modulation switches for which to switch axis
 static int switch_threshold = 0;
 
-// ----------------- Callbacks  ----------------- 
-int64_t axis_unstable_callback(alarm_id_t id, void *user_data) {
+static int64_t axis_unstable_callback(alarm_id_t id, void *user_data) {
     axis_state_stable = true;
     return 0;
 }
 
-int64_t modulation_unstable_callback(alarm_id_t id, void *user_data) {
+static int64_t modulation_unstable_callback(alarm_id_t id, void *user_data) {
     modulation_state_stable = true;
     return 0;
 }
 
-int64_t modulation_propagated_callback(alarm_id_t id, void *user_data) {
+static int64_t modulation_propagated_callback(alarm_id_t id, void *user_data) {
     
     // Transient has just now propagated, state is unstable for the specified time
     modulation_state_stable = false;
@@ -102,13 +92,31 @@ static bool current_timer_callback(repeating_timer_t *rt) {
     return true;
 }
 
-// ----------------- Functions -----------------  
+// =====================================================================================================================
+// API (Public)
+// =====================================================================================================================
+
+// Current state
+volatile bool modulation_state_stable = true;
+volatile bool axis_state_stable = true;
+volatile SpinningCurrentState spinning_current_state = CURRENT_SOUTH;
+
+// Parameters
+volatile uint32_t integration_time_ms = DEFAULT_INTEGRATION_TIME_MS; 
+volatile uint32_t current_polarity_frequency = DEFAULT_CURRENT_POLARITY_FREQUENCY;
+volatile uint32_t current_axis_frequency = DEFAULT_CURRENT_AXIS_FREQUENCY; 
+volatile uint32_t modulation_propagation_time_us = DEFAULT_MODULATION_PROPAGATION_TIME_US;
+volatile uint32_t modulation_unstable_time_us = DEFAULT_MODULATION_UNSTABLE_TIME_US;
+volatile uint32_t axis_unstable_time_us = DEFAULT_AXIS_UNSTABLE_TIME_US;
+volatile CurrentLevel user_defined_current_level = CURRENT_3000_uA; // TODO: rename and make this static, using getters/setters
 
 void start_current_timer() {
+    // Calculate the axis switching threshold, the polarity switch period and reset the counter
     switch_counter = 0;
     switch_threshold = current_polarity_frequency / current_axis_frequency;
     int polarity_period_us = FREQUENCY_TO_TIMER_US(current_polarity_frequency);
 
+    // Start modulation timer
     add_repeating_timer_us(
         -polarity_period_us, 
         current_timer_callback, 

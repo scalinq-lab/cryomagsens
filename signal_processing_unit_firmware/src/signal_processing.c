@@ -15,21 +15,32 @@
 
 #include "pico/stdlib.h"
 
-
-volatile bool integration_timer_flag = false;
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
 
 static repeating_timer_t integration_timer;
 
+// Simple repeating callback that updates flag each time integration time has passed
 static bool integration_callback(repeating_timer_t *rt) {
     integration_timer_flag = true;
     return true; 
 }
 
+// =====================================================================================================================
+// API (Public)
+// =====================================================================================================================
+
+volatile bool integration_timer_flag = false;
+
+// Not in flash to make sure that this has minimum overhead to avoid SPI corruption
 void __not_in_flash_func(read_loop)() {
     while (true) {
+
         // Wait for DRDY (MISO goes low)
         while (gpio_get(ADC0_MISO));
 
+        // This is technically not completely thread-safe, but it is fast and the rare error will easily average out
         producer_writing = true;
 
         // Read raw ADC value (24-bit offset binary)

@@ -5,6 +5,10 @@
 
 #pragma once
 
+// =====================================================================================================================
+// Functions
+// =====================================================================================================================
+
 // Initilizes SPI port 1 for communication with the ADC
 // - Sets clock frequency to 20 MHz
 // - Configures SCLK and MISO pins as SPI pins
