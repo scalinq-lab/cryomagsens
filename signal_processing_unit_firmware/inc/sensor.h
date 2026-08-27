@@ -5,9 +5,10 @@
 
 #pragma once
 
+#include "config.h" 
+
 #include <stdbool.h>
 #include <stdint.h>
-#include "config.h" 
 
 extern volatile bool sensor_presence_changed_flag;
 extern volatile bool all_sensors_read_flag;

@@ -3,9 +3,11 @@
 // This software is released under the MIT License. 
 // <https://opensource.org/licenses/MIT>
 
-#include "config.h"
 #include "ADS8866_adc.h"
 
+#include "config.h"
+
+#include "pico/stdlib.h"
 #include "hardware/spi.h"
  
 // Global variable that checks time since pico bootup

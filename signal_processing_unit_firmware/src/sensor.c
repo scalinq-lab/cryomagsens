@@ -3,8 +3,13 @@
 // This software is released under the MIT License. 
 // <https://opensource.org/licenses/MIT>
 
-#include "config.h"
 #include "sensor.h"
+
+#include "config.h"
+
+#include <stdio.h>
+
+#include "pico/stdlib.h"
 
 volatile bool sensor_presence_changed_flag = false;
 volatile bool all_sensors_read_flag = false;

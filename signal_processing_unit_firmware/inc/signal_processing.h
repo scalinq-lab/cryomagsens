@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <stdbool.h>
+
 // Flag indicating that the processor has finished collecting data
 extern volatile bool integration_timer_flag;
 

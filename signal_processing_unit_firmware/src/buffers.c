@@ -4,9 +4,12 @@
 // This software is released under the MIT License. 
 // <https://opensource.org/licenses/MIT>
 
-#include "config.h"
 #include "buffers.h"
+
+#include "config.h"
 #include "current_control.h"
+
+#include <stdio.h>
 
 volatile accum_t buffers[2] = {0, 0};
 volatile uint8_t consumer_buffer_index = 0;

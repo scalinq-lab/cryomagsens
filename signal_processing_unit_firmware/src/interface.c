@@ -5,12 +5,18 @@
 // <https://opensource.org/licenses/MIT>
 
 #include "interface.h"
+
+#include "config.h"
+#include "AD7175_adc.h"
 #include "current_control.h"
 #include "sensor.h"
-#include "buffers.h"
-#include "AD7175_adc.h"
+
+#include <stdio.h>
 #include <string.h>
+
+#include "pico/stdlib.h"
 #include "pico/multicore.h"
+
 
 static char usb_buffer[INPUT_BUFFER_SIZE];
 static uint8_t usb_buffer_index = 0;

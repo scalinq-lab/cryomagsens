@@ -14,6 +14,9 @@
 #include "sensor.h"
 #include "signal_processing.h"
 
+#include <stdio.h>
+
+#include "pico/stdlib.h"
 #include "pico/multicore.h"
 #include "hardware/adc.h"
 

@@ -6,8 +6,11 @@
 
 #include "AD7175_adc.h"
 
-#include "hardware/spi.h"
+#include "config.h"
 #include "current_control.h"
+
+#include "pico/stdlib.h"
+#include "hardware/spi.h"
 
 // Default value assumes that the ADC has managed to zero in perfectly
 int32_t volatile zeroed_offset_binary = 0x800000;

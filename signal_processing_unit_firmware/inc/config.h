@@ -5,11 +5,6 @@
 
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "pico/stdlib.h"
-
 /* PARAMETERS */
 // Hardware parameters
 #define ADC_VOLTAGE_REFERENCE 2.5

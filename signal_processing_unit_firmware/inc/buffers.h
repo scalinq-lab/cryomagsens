@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "config.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 // A struct to store all retrieved data from the adc without needing to do much preprocessing during collection
 typedef struct {

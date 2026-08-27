@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "config.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 // Enum naming the different spinning current states after general direction of the current
 typedef enum {

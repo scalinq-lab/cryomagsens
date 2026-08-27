@@ -6,6 +6,10 @@
 
 #include "current_control.h"
 
+#include "config.h"
+
+#include "pico/stdlib.h"
+
 // ----------------- Global variables -----------------  
 volatile bool modulation_state_stable = true;
 volatile bool axis_state_stable = true;

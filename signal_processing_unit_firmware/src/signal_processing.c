@@ -4,11 +4,17 @@
 // This software is released under the MIT License. 
 // <https://opensource.org/licenses/MIT>
 
-#include "config.h"
 #include "signal_processing.h"
+
+#include "config.h"
+#include "AD7175_adc.h"
 #include "buffers.h"
 #include "current_control.h"
-#include "AD7175_adc.h"
+
+#include <stdio.h>
+
+#include "pico/stdlib.h"
+
 
 volatile bool integration_timer_flag = false;
 

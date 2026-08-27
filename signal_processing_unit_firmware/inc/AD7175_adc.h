@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "config.h"
+#include <stdint.h>
 
 // AD7175-2 Register Map
 #define REG_ADCMODE   0x01

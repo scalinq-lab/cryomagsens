@@ -4,9 +4,11 @@
 // This software is released under the MIT License. 
 // <https://opensource.org/licenses/MIT>
 
-#include "config.h"
 #include "gpio.h"
 
+#include "config.h"
+
+#include "pico/stdlib.h"
 
 void init_gpio() {
     gpio_init(PIN_POWER_ENABLE_POS);

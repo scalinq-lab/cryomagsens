@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "config.h"
+#include <stdbool.h>
 
 #define INPUT_BUFFER_SIZE 64
 
