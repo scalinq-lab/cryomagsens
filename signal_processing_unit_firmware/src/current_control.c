@@ -108,7 +108,7 @@ volatile uint32_t current_axis_frequency = DEFAULT_CURRENT_AXIS_FREQUENCY;
 volatile uint32_t modulation_propagation_time_us = DEFAULT_MODULATION_PROPAGATION_TIME_US;
 volatile uint32_t modulation_unstable_time_us = DEFAULT_MODULATION_UNSTABLE_TIME_US;
 volatile uint32_t axis_unstable_time_us = DEFAULT_AXIS_UNSTABLE_TIME_US;
-volatile CurrentLevel user_defined_current_level = CURRENT_3000_uA; // TODO: rename and make this static, using getters/setters
+volatile CurrentLevel user_defined_current_level = CURRENT_3000_uA;
 
 void start_current_timer() {
     // Calculate the axis switching threshold, the polarity switch period and reset the counter

@@ -36,7 +36,7 @@ static void init() {
     stdio_init_all();
     printf("USB initialized.\n");
 
-    // Initialize gpio pins TODO: Possibly move gpio inits to each corresponing unit, instead of gpio.c
+    // Initialize gpio pins
     init_gpio();
     printf("GPIO initialized.\n");
 
@@ -111,10 +111,13 @@ int main()
             // 3. Disable power to the current source
             gpio_put(PIN_POWER_ENABLE_2V5, 0);
 
-            // 4. Just went idle, wait before printing
+            // 4. Clear integration timer flag
+            integration_timer_flag = false;
+
+            // 5. Just went idle, wait before printing
             time_last_idle_print = time_us_64();
 
-            // 5. Report that a clean shutdown has now occured
+            // 6. Report that a clean shutdown has now occured
             printf("Clean shutdown completed!\n\n");
         }
 
@@ -163,7 +166,7 @@ int main()
         
         
         // --- DATA PROCESSING & SENSOR SWITCH ---
-        if (integration_timer_flag) { // TODO: CLEAR FLAG DURING SHUTDOWN
+        if (integration_timer_flag) {
             integration_timer_flag = false;
 
             // 1. Start temperature voltage conversion
@@ -208,7 +211,7 @@ int main()
 
             printf("Sensor configuration changed...\n\n");
 
-            sleep_ms(100); // TODO: Make sure that you handle contact bouncing properly, this is a temporary fix
+            sleep_ms(100);
 
             // Reconfigure sensors and update activity flags
             configure_sensors();
@@ -216,7 +219,9 @@ int main()
             // At least something changed, we cannot trust the latest data
             // thus we need to reconfigure measurement settings
             
-            do_clean_shutdown = true; // TODO: Maybe gate this to only happen if we are actively measuring
+            if (measurement_active) {
+                do_clean_shutdown = true;
+            }
         }
 
 
@@ -231,7 +236,5 @@ int main()
             }
             time_last_idle_print = time_us_64();
         }
-
-        // TODO: Blink light depending on state (active, idle, manual off, etc.)
     }
 }

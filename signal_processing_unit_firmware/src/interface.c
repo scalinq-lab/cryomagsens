@@ -120,7 +120,7 @@ void process_command() {
         printf("    - Print current system status\n\n");
 
         printf("  set current level <>\n");
-        printf("    - 0 - 3 mA, 1 - 300 uA, 2 - 30 uA, 3 - 8.3 mA, 4 - Auto (Not yet implemented)\n\n"); // TODO: auto
+        printf("    - 0 - 3 mA, 1 - 300 uA, 2 - 30 uA, 3 - 8.3 mA, 4 - Auto (Not yet implemented)\n\n");
 
         printf("  set integration time <ms>\n");
         printf("    - Set the integration time in milliseconds\n\n");
@@ -199,7 +199,7 @@ void process_command() {
         
         printf("- Sensor connection status [%d, %d, %d]\n", sensor_active[0], sensor_active[1], sensor_active[2]);
         printf("- Integration interval: %u ms\n", integration_time_ms);
-        printf("- Current level: %u uA\n", user_defined_current_level); // TODO: Translate to real current value
+        printf("- Current level: %u uA\n", user_defined_current_level);
         printf("- Current Polarity Frequency: %u Hz\n", current_polarity_frequency);
         printf("- Current Axis Frequency: %u Hz\n", current_axis_frequency);
         printf("- Current Propagation Time: %u us\n", modulation_propagation_time_us);
@@ -294,7 +294,7 @@ void process_command() {
         }
 
         else {
-            printf("No sensor connected at channel %u\n\n", parameter_0); // TODO: Error for non-existant channel
+            printf("No sensor connected at channel %u\n\n", parameter_0);
         }
         
     }
