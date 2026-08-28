@@ -42,7 +42,7 @@ time.sleep(1)
 
 print("Requesting raw data points from the ADC...")
 
-raw_data = spu.get_raw_data(5600)
+raw_data = spu.get_raw_data(56000)
 
 # Separate stable data points (mod_state == 1) by spinning current state
 state_voltages = {0: [], 1: [], 2: [], 3: []}       
