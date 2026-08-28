@@ -10,12 +10,20 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
  
-// Global variable that checks time since pico bootup
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
+
+// Time to calculate against wether sufficent time has passed
 static uint64_t conversion_start_time;
+
+// =====================================================================================================================
+// API (Public)
+// =====================================================================================================================
 
 void init_ads8866(void) {
 
-    // Initilize the spi1 port
+    // Initilize the SPI1 port
     spi_init(SPI_ADC1, 2000000);
     spi_set_format(SPI_ADC1, 16, SPI_CPOL_0, SPI_CPHA_1, SPI_MSB_FIRST);
 

@@ -20,6 +20,10 @@
 #include "pico/multicore.h"
 #include "hardware/adc.h"
 
+// =====================================================================================================================
+// Static (Private)
+// =====================================================================================================================
+
 static bool do_clean_shutdown = false;
 static uint64_t time_last_idle_print = 0;
 static float temperature_voltages[NUMBER_OF_SENSORS] = {-1.0f, -1.0f, -1.0f};
@@ -32,7 +36,7 @@ static void init() {
     stdio_init_all();
     printf("USB initialized.\n");
 
-    // Initialize gpio pins TODO: Possibly move gpio inits to each corresponing unit, instead of gpio.c
+    // Initialize gpio pins
     init_gpio();
     printf("GPIO initialized.\n");
 
@@ -71,6 +75,10 @@ static void print_results() {
     printf("\n");
 }
 
+// =====================================================================================================================
+// Main
+// =====================================================================================================================
+
 int main()
 {
     init();
@@ -78,13 +86,11 @@ int main()
     /* POLLING LOOP */
     while (true) {
 
-
         // --- READ USER COMMANDS ---
         if (read_usb_input()) {
             // Process the command if one was received
             process_command();
         }
-
 
         // --- STOP MEASUREMENT ---
         // Clean shutdown ensured all timers are turned off
@@ -103,13 +109,15 @@ int main()
             // 3. Disable power to the current source
             gpio_put(PIN_POWER_ENABLE_2V5, 0);
 
-            // 4. Just went idle, wait before printing
+            // 4. Clear integration timer flag
+            integration_timer_flag = false;
+
+            // 5. Just went idle, wait before printing
             time_last_idle_print = time_us_64();
 
-            // 5. Report that a clean shutdown has now occured
+            // 6. Report that a clean shutdown has now occured
             printf("Clean shutdown completed!\n\n");
         }
-
 
         // --- START MEASUREMENT ---
         // If we are currently inactive and we have sensors connected we want to start measurement if we ensure:
@@ -153,9 +161,8 @@ int main()
             printf("Measurements started!\n\n");
         }
         
-        
         // --- DATA PROCESSING & SENSOR SWITCH ---
-        if (integration_timer_flag) { // TODO: CLEAR FLAG DURING SHUTDOWN
+        if (integration_timer_flag) {
             integration_timer_flag = false;
 
             // 1. Start temperature voltage conversion
@@ -164,7 +171,6 @@ int main()
                 ads8866_start_conversion();
                 sum += ads8866_get_voltage();
             }
-            
 
             // 2. Switch buffers
             // - This is timed to the beginning of a spinning current cycle
@@ -193,14 +199,13 @@ int main()
             flush_buffers();
         }
 
-
         // --- UPDATE SENSORS ---
         if (sensor_presence_changed_flag) {
             sensor_presence_changed_flag = false;
 
             printf("Sensor configuration changed...\n\n");
 
-            sleep_ms(100); // TODO: Make sure that you handle contact bouncing properly, this is a temporary fix
+            sleep_ms(100);
 
             // Reconfigure sensors and update activity flags
             configure_sensors();
@@ -208,9 +213,10 @@ int main()
             // At least something changed, we cannot trust the latest data
             // thus we need to reconfigure measurement settings
             
-            do_clean_shutdown = true; // TODO: Maybe gate this to only happen if we are actively measuring
+            if (measurement_active) {
+                do_clean_shutdown = true;
+            }
         }
-
 
         // --- IDLE MESSAGE ---
         if (!measurement_active && time_us_64() - time_last_idle_print > 5000000) {
@@ -223,7 +229,5 @@ int main()
             }
             time_last_idle_print = time_us_64();
         }
-
-        // TODO: Blink light depending on state (active, idle, manual off, etc.)
     }
 }

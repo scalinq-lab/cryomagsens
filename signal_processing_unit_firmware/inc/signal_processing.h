@@ -8,8 +8,16 @@
 
 #include <stdbool.h>
 
-// Flag indicating that the processor has finished collecting data
+// =====================================================================================================================
+// Global variables
+// =====================================================================================================================
+
+// Flag indicating that integration timer has passed, meaning it's time to switch buffers and calculate hall voltage
 extern volatile bool integration_timer_flag;
+
+// =====================================================================================================================
+// Functions
+// =====================================================================================================================
 
 // Main second core loop to continuously read from the Hall Voltage ADC
 void read_loop();

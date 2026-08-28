@@ -9,7 +9,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// A struct to store all retrieved data from the adc without needing to do much preprocessing during collection
+// =====================================================================================================================
+// ADC Sample accumulator struct
+// =====================================================================================================================
+
 typedef struct {
     int64_t sum_n;
     uint32_t count_n;
@@ -20,6 +23,10 @@ typedef struct {
     int64_t sum_w;
     uint32_t count_w;
 } accum_t;
+
+// =====================================================================================================================
+// Global variables
+// =====================================================================================================================
 
 // Two accum_t buffers, one for the consumer (core0) and one for the producer (core1)
 extern volatile accum_t buffers[2];
@@ -38,6 +45,10 @@ extern volatile bool consumed_buffer;
 
 // Flag for flow control in main and deadlock protection in state synced buffer switching
 extern volatile bool measurement_active;
+
+// =====================================================================================================================
+// Functions
+// =====================================================================================================================
 
 // Performs a clean, timed switch between producer and consumer buffers
 // - Clears old consumer buffer
